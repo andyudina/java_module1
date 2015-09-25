@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Logout</title>
+</head>
+<body>
+    <p>Login: ${Login}</p>
+    <form action="/logout" method="POST">
+        <p><input type="submit" value="Logout"></p>
+    </form>
+</body>
+</html>
+

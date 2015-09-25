@@ -1,0 +1,90 @@
+package frontend;
+
+import main.AccountService;
+import main.UserProfile;
+import templater.PageGenerator;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by v.chibrikov on 13.09.2014.
+ */
+public class SignUpServlet extends HttpServlet {
+    private AccountService accountService;
+
+    public SignUpServlet(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    public void doGet(HttpServletRequest request,
+                      HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String sessionId = session.toString();
+        String login = (String) session.getAttribute("bestGameEverLogin");
+        if (login != null && accountService.getSessions(sessionId) != null) {
+            response.sendRedirect("/logout");
+        } 
+        else {
+            Map<String, Object> pageVariables = new HashMap<>();
+            pageVariables.put("Error", "");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("text/html;charset=utf-8");
+            response.getWriter().println(PageGenerator.getPage("registerform.html", pageVariables));
+        }
+    }
+
+    public void doPost(HttpServletRequest request,
+                       HttpServletResponse response) throws ServletException, IOException {
+        String login = request.getParameter("login");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("text/html;charset=utf-8");
+        /*Map<String, Object> pageVariables = new HashMap<>();
+        pageVariables.put("login", email == null ? "" : login);
+        pageVariables.put("password", password == null ? "" : password);*/
+        HttpSession session = request.getSession();
+        String sessionId = session.toString();
+        String sessionLogin = (String) session.getAttribute("bestGameEverLogin");
+        if (sessionLogin != null && accountService.getSessions(sessionId) != null) {
+            response.sendRedirect("/logout");
+            return;
+        }  
+
+        Map<String, Object> pageVariables = new HashMap<>();
+        if (email == null || login == null || password == null) {
+            pageVariables.put("Error", "All fields are nessesary");
+            response.getWriter().println(PageGenerator.getPage("registerform.html", pageVariables));
+            return;
+            
+        }
+
+        UserProfile user = accountService.getUser(login);
+        if (user != null) {
+            pageVariables.put("Error", "User already exists");
+            response.getWriter().println(PageGenerator.getPage("registerform.html", pageVariables));
+            return;
+        }
+
+        user = new UserProfile(login, password, email);
+        boolean addUserResultFlag = accountService.addUser(login, user);
+        if (addUserResultFlag == false) {
+            pageVariables.put("Error", "Unknown error");
+            response.getWriter().println(PageGenerator.getPage("registerform.html", pageVariables));
+            return;            
+        }
+
+        session.setAttribute("bestGameEverLogin", login);
+        accountService.addSessions(session.toString(), user);
+        response.sendRedirect("/logout");
+    }
+
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Admin</title>
+</head>
+<body>
+    <p>status: ${status}</p>
+    <form action="/admin" method="GET">
+        <input type="number" name="timeString" value="0" />
+        <input type="submit" name="shutdown" value="shutdown" /> <br/>
+        <input type="submit" name="showuserlist" value="show users list"/>
+    </form>
+    <#if signedUpUsers?has_content>
+        <ul>
+        <#list signedUpUsers as user>
+            <li>user</li>
+        </#list>
+        </ul>
+    </#if>
+
+    <#if signedInUsers?has_content>
+        <ul>
+        <#list signedInUsers as user>
+            <li>user</li>
+        </#list>
+        </ul>
+    </#if>
+</body>
+</html>
